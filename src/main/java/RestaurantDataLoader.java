@@ -1,4 +1,6 @@
 import java.io.FileReader;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,26 +9,29 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class RestaurantDataLoader {
-    public static List<Restaurant> loadRestaurants(String filename) {
+    public static List<Restaurant> loadRestaurants(String filename) throws Exception {
         List<Restaurant> restaurants = new ArrayList<>();
         try {
-            JSONObject j = new JSONObject();
-            Object o = new JSONParser().parse(new FileReader(filename));
-            for (Object key : (JSONArray) o) {
-                j = (JSONObject) key;
-                String name = (String)j.get("name");
-                double averageRating = Double.parseDouble((String)j.get("averageRating"));
-                int totalReviews = Integer.parseInt((String)j.get("totalReviews"));
-                int numberOfReviewsInLast30Days = Integer.parseInt((String)j.get("numberOfReviewsInLast30Days"));
-
-                Restaurant r = new Restaurant(name, averageRating, totalReviews, numberOfReviewsInLast30Days);
-                restaurants.add(r);
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(new FileReader(filename));
+            JSONArray jsonArray = (JSONArray) obj;
+            for (Object jsonObj : jsonArray) {
+                JSONObject restaurantJson = (JSONObject) jsonObj;
+                String name = (String) restaurantJson.get("name");
+                double averageRating = Double.parseDouble((String) restaurantJson.get("averageRating"));
+                int totalReviews = Integer.parseInt((String) restaurantJson.get("totalReviews"));
+                int numberOfReviewsInLast30Days = Integer.parseInt((String) restaurantJson.get("numberOfReviewsInLast30Days"));
+                Restaurant restaurant = new Restaurant(name, averageRating, totalReviews, numberOfReviewsInLast30Days);
+                restaurants.add(restaurant);
             }
-            
             return restaurants;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+        } 
+        catch (NumberFormatException e) {
+            throw e;
         }
+        catch (IOException e) {
+            throw e;
+        }
+        
     }
 }
